@@ -1,15 +1,20 @@
 extends CharacterBody3D
 
 @onready var head = $"Head (pivot)"
+@onready var cam = $"Head (pivot)/Camera3D"
 
 var currentSpeed = 50
 var direction = Vector3.ZERO
 var currentDampValue = 1.0
+var camTiltValue = deg_to_rad(2)
+var defaultFOV = 90.0
+var fovMod = 5
 
 @export var walkSpeed = 500
 @export var sprintSpeed = 600
 @export var mouseSensitivity = 0.075
 @export var moveSmoothing = 20
+@export var lookTiltSmoothing = 15
 @export var airDamping = 0.125
 @export var jumpVelocity = 6.75
 
@@ -50,5 +55,19 @@ func _physics_process(delta):
 	else:
 		velocity.x = move_toward(velocity.x, 0, currentSpeed) * delta
 		velocity.z = move_toward(velocity.z, 0, currentSpeed) * delta
+		
+	#rotate the camera slightly in the direction you're moving
+	if abs(input_dir.x) > 0.5:
+		head.rotation.z = lerp(head.rotation.z, camTiltValue * (-1.0 * sign(input_dir.x)), delta * lookTiltSmoothing)
+	else:
+		head.rotation.z = lerp(head.rotation.z, 0.0, delta * lookTiltSmoothing)
+	
+	
+	# Tried this but it didn't really feel that great, might try again when there's more gameplay
+	
+	#if abs(input_dir.y) > 0.5:
+		#cam.fov = lerp(cam.fov,defaultFOV + (fovMod * sign(input_dir.y)),delta * 10)
+	#else:
+		#cam.fov = lerp(cam.fov,defaultFOV,delta * 10)
 
 	move_and_slide()
